@@ -32,8 +32,8 @@ I want to _use_ it like this:
 
 ```cpp
 auto suspects = vector<suspect>{
-{1, "Keyser Söze"s, 1000.0}, {2, "Kobayashi"s, 500.0},   {3, "Fred Fenster"s, 500.0},
-{4, "Jack Baer"s, 100.0},    {5, "Dean Keaton"s, 800.0}, {6, "Michael McManus"s, 100.0},
+    {1, "Keyser Söze"s, 1000.0}, {2, "Kobayashi"s, 500.0},   {3, "Fred Fenster"s, 500.0},
+    {4, "Jack Baer"s, 100.0},    {5, "Dean Keaton"s, 800.0}, {6, "Michael McManus"s, 100.0},
 };
 
 print("input rows: {}\n", suspects);
