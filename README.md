@@ -1,4 +1,4 @@
-# _xbow_ - range-v3 views and actions for Arrow C++
+# _xbow_ - [range-v3](https://github.com/ericniebler/range-v3) views and actions for Arrow C++
 
 ## Why _xbow_?
 
@@ -159,7 +159,116 @@ cd build/release
 cmake .
 ```
 
-## Plans
+## Usage
+
+Usage examples can be found [in the tests](https://github.com/seertaak/xbow/blob/main/tests/test_xbow.cpp),
+and [in the examples directory.](https://github.com/seertaak/xbow/tree/main/examples)
+
+### Defining Custom Tables
+
+Use the _def_record_ macro to define the types of rows of tables you want to 
+manipulate in _xbow_. This leverages 
+[Boost.Hana](https://www.boost.org/doc/libs/1_76_0/libs/hana/doc/html/index.html#tutorial-introspection-adapting)
+to create static introspection machinery, which is used by _xbow_ to figure out the right concrete 
+types for the Arrow array objects.
+
+**Example**:
+
+```cpp
+def_record(point,
+    (double, x),
+    (double, y)
+);
+
+def_record(person,
+    (int64_t, id),
+    (xb::date, dob),
+    (string, name),
+    (double, cost),
+    (array<double, 3>, cost_components),
+    (point, p)  
+);
+```
+
+**Notes**:
+
+1. In principle, the record types can be nested as in the example above. This will work for the purpose
+   of Arrow schema generation. Aggregates such as arrays and vectors are also supported. (Again, in principle
+   you can use element type, with the caveat below.)
+2. However, round-tripping (actual range use) currently doesn't support structures within structures. It's
+   planned, and it's certainly possible using the reflective setup.
+3. Currently only numeric and string types are supported, with partial support for boolean arrays (stored as
+   bitmasks).
+4. Partial support, with more planned, for dates and timestamp - these map from their Arrow concrete types to
+   suitable modern C++ counterparts: hinnant's [date](https://github.com/HowardHinnant/date) and std's 
+   [chrono](https://en.cppreference.com/w/cpp/chrono) libraries, respectively.
+
+### Actions: Ranges To Arrow Objects
+
+One use-case is that we already have a range or container with objects of our 
+(appropriately defined - see above) row type, and our goal is to create the 
+concomitant Arrow objects. This is accomplished using _xbows's_ 
+[**actions**](https://g
+Usage examples can be found [in the tests](https://github.com/seertaak/xbow/blob/main/tests/test_xbow.cpp),
+and [in the examples directory.](https://github.com/seertaak/xbow/tree/main/examples).
+ithub.com/seertaak/xbow/blob/main/include/xbow/arrow/actions.hpp), so 
+called because they are side-effecting: they create new Arrow objects, which 
+involves memory allocation.
+
+```cpp
+// convert a scalar range (i.e. a single column) into the appropriate Arrow array
+// object.
+template <range R>
+auto to_arrow_array(R&& input) -> meta::array_obj<xb::meta::element_t<R>>;
+
+// convert a range over an appropriately defined 
+template <ranges::range Range>
+auto to_table(Range&& rows);
+```
+
+### Views: Views on Arrow Ojects
+
+In the other direction, we start with an Arrow array or table, and want to 
+query or manipulate the data using range-v3 ranges. In this case, no allocation
+is necessary, and so we adopt the 
+[**view**](https://github.com/seertaak/xbow/blob/main/include/xbow/arrow/views.hpp) 
+terminology. 
+
+```cpp
+// given a suitably defined record type (see above) convert an Arrow Table to a range 
+// over items of the row type.
+template <xb::meta::record R>
+auto to_range(const std::shared_ptr<::arrow::Table>& table);
+
+// convert a concrete Arrow array object to a view, no memory is allocated. (e.g.
+// strings are represented as std::string_views whose pointer points to the Arrow
+// memory itself, rather than creating copies. The range produced by this version 
+// does not allow null elements. If you have missing elements, use 
+// optional_array_view, below.
+template <typename A>
+auto array_view(const std::shared_ptr<A>& array) -> decltype(auto);
+
+// Same as above, but allowing missing elements. Let's say you create A has element
+// "StringType". Then optional_array_view will produce a range of 
+// std::optional<std::string>. That is to say, nullity/non-nullity are represented
+// using std::optional.
+template <typename A>
+auto optional_array_view(const std::shared_ptr<A>& array) -> decltype(auto);
+
+// Arrow tables are created out of so-called chunked arrays. They're usually pretty
+// horrible to deal with. This helper function creates a range of ranges; the outer
+// range obviously representing the chunks.
+template <ranges::semiregular T>
+auto chunked_array_view(const ::arrow::ChunkedArray& chunks) -> unspecified;
+
+```
+
+## Future Plans
+
+Much tighter integration with Python. Use PEP484 and python's AST introspection to
+generate the appropriate record class from a Python specification. Even more ambitious:
+allow using Numba or Cython to generate UDFs that compiled inline with the aggregation
+code to allow ultimate performance and flexibility.
 
 1. A python file defines functions and types which are passed to functions and template types.
    ```python
