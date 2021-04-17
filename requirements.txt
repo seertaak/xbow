@@ -1,0 +1,9 @@
+conan
+pandas
+numpy
+matplotlib
+jupyterlab
+cython
+pybind11
+clang
+jinja2
