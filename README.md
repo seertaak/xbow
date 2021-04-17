@@ -44,14 +44,14 @@ print("input rows: {}\n", suspects);
 // This code shows that we can take a bog-standard range-v3 pipeline and convert it to
 // an arrow object. This could later, for example, be written to a parquet file (WIP).
 const auto table = suspects 
-| views::transform([](auto&& p) -> suspect& {
-boost::to_upper(p.name);
-return p;
-})
-| views::stride(2)  
-| views::cycle 
-| views::take(20) 
-| xb::arrow::actions::to_table;
+                     | views::transform([](auto&& p) -> suspect& {
+                        boost::to_upper(p.name);
+                        return p;
+                       })
+                     | views::stride(2)  
+                     | views::cycle 
+                     | views::take(20) 
+                     | xb::arrow::actions::to_table;
 
 // below: note that to_range<suspect>(table) returns a range consisting of chunks, each of which
 // is also a range. These chunks correspond exactly to the actual low-level chunks in the
