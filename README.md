@@ -31,36 +31,36 @@ def_record(suspect,
 I want to _use_ it like this:
 
 ```cpp
-    auto suspects = vector<suspect>{
-        {1, "Keyser Söze"s, 1000.0}, {2, "Kobayashi"s, 500.0},   {3, "Fred Fenster"s, 500.0},
-        {4, "Jack Baer"s, 100.0},    {5, "Dean Keaton"s, 800.0}, {6, "Michael McManus"s, 100.0},
-    };
+auto suspects = vector<suspect>{
+{1, "Keyser Söze"s, 1000.0}, {2, "Kobayashi"s, 500.0},   {3, "Fred Fenster"s, 500.0},
+{4, "Jack Baer"s, 100.0},    {5, "Dean Keaton"s, 800.0}, {6, "Michael McManus"s, 100.0},
+};
 
-    print("input rows: {}\n", suspects);
+print("input rows: {}\n", suspects);
 
-    // below: traverse the rows, changing name to upper case, skipping every other element,
-    // cycling over rows so that they repeat and taking exactly 20 of these rows, and finally
-    // this range-v3 range is converted to a regular arrow table.
-    // This code shows that we can take a bog-standard range-v3 pipeline and convert it to
-    // an arrow object. This could later, for example, be written to a parquet file (WIP).
-    const auto table = suspects 
-                       | views::transform([](auto&& p) -> suspect& {
-                           boost::to_upper(p.name);
-                           return p;
-                         })
-                       | views::stride(2)  
-                       | views::cycle 
-                       | views::take(20) 
-                       | xb::arrow::actions::to_table;
+// below: traverse the rows, changing name to upper case, skipping every other element,
+// cycling over rows so that they repeat and taking exactly 20 of these rows, and finally
+// this range-v3 range is converted to a regular arrow table.
+// This code shows that we can take a bog-standard range-v3 pipeline and convert it to
+// an arrow object. This could later, for example, be written to a parquet file (WIP).
+const auto table = suspects 
+| views::transform([](auto&& p) -> suspect& {
+boost::to_upper(p.name);
+return p;
+})
+| views::stride(2)  
+| views::cycle 
+| views::take(20) 
+| xb::arrow::actions::to_table;
 
-    // below: note that to_range<suspect>(table) returns a range consisting of chunks, each of which
-    // is also a range. These chunks correspond exactly to the actual low-level chunks in the
-    // arrow file. We view::join this range to produce a single, collated range, which we then
-    // convert to a std::vector<suspect> for the sole reason of printing. Note how easily we
-    // taped together the chunks! Normally this would be two-level for loop involving laborious
-    // extraction of each field, type-casting, urgh!
-    print("round-tripped rows: {}\n",
-          xb::arrow::views::to_range<suspect>(table) | views::join | to<vector<suspect>>);
+// below: note that to_range<suspect>(table) returns a range consisting of chunks, each of which
+// is also a range. These chunks correspond exactly to the actual low-level chunks in the
+// arrow file. We view::join this range to produce a single, collated range, which we then
+// convert to a std::vector<suspect> for the sole reason of printing. Note how easily we
+// taped together the chunks! Normally this would be two-level for loop involving laborious
+// extraction of each field, type-casting, urgh!
+print("round-tripped rows: {}\n",
+xb::arrow::views::to_range<suspect>(table) | views::join | to<vector<suspect>>);
 ```
 ...which should produce output like this:
 
@@ -253,7 +253,7 @@ auto array_view(const std::shared_ptr<A>& array) -> decltype(auto);
 // std::optional<std::string>. That is to say, nullity/non-nullity are represented
 // using std::optional.
 template <typename A>
-auto optional_array_view(const std::shared_ptr<A>& array) -> decltype(auto);
+auto optional_array_view(const std::sharedhttps://en.cppreference.com/w/cpp/chrono_ptr<A>& array) -> decltype(auto);
 
 // Arrow tables are created out of so-called chunked arrays. They're usually pretty
 // horrible to deal with. This helper function creates a range of ranges; the outer
@@ -284,7 +284,7 @@ code to allow ultimate performance and flexibility.
    E = employees.accessors
    
    
-   while request:
+   while requesthttps://en.cppreference.com/w/cpp/chrono:
       team_id = request.next().team_id
       team_costs = (
             employees
